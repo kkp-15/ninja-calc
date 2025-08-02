@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>電卓メモ帳</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 1rem;
+      max-width: 500px;
+      margin: auto;
+    }
+
+    #display {
+      font-size: 2rem;
+      text-align: right;
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      margin-bottom: 1rem;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .buttons button {
+      font-size: 1.5rem;
+      padding: 1rem;
+    }
+
+    #date, #memo {
+      width: 100%;
+      margin-bottom: 0.5rem;
+      padding: 0.5rem;
+      font-size: 1rem;
+    }
+
+    #register, #download {
+      width: 100%;
+      padding: 0.75rem;
+      font-size: 1rem;
+      margin: 0.5rem 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+      font-size: 0.9rem;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 0.3rem;
+      text-align: center;
+    }
+
+    #footer {
+      margin-top: 2rem;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    #footer a {
+      color: #333;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>電卓メモ帳</h1>
+
+  <div id="display">0</div>
+  <div class="buttons">
+    <button onclick="press('7')">7</button>
+    <button onclick="press('8')">8</button>
+    <button onclick="press('9')">9</button>
+    <button onclick="press('/')">÷</button>
+
+    <button onclick="press('4')">4</button>
+    <button onclick="press('5')">5</button>
+    <button onclick="press('6')">6</button>
+    <button onclick="press('*')">×</button>
+
+    <button onclick="press('1')">1</button>
+    <button onclick="press('2')">2</button>
+    <button onclick="press('3')">3</button>
+    <button onclick="press('-')">−</button>
+
+    <button onclick="press('0')">0</button>
+    <button onclick="press('.')">.</button>
+    <button onclick="calculate()">=</button>
+    <button onclick="press('+')">＋</button>
+  </div>
+
+  <input type="date" id="date" />
+  <input type="text" id="memo" placeholder="メモを入力" />
+  <button id="register" onclick="register()">登録する</button>
+
+  <table id="history">
+    <thead>
+      <tr><th>計算式</th><th>結果</th><th>日付</th><th>メモ</th><th>削除</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <button id="download" onclick="downloadCSV()">CSV出力</button>
+
+  <div id="footer">
+    X <a href="https://x.com/kkp_webninja" target="_blank">@kkp_webninja</a><br>
+    🏯 <a href="https://kkpwebninja.com" target="_blank">web忍者の本丸</a><br>
+  </div>
+
+  <script>
+    let display = document.getElementById("display");
+    let currentInput = "";
+
+    function press(value) {
+      if (display.textContent === "0" && value !== ".") {
+        currentInput = value;
+      } else {
+        currentInput += value;
+      }
+      display.textContent = currentInput;
+    }
+
+    function calculate() {
+      try {
+        const result = eval(currentInput);
+        currentInput = String(result);
+        display.textContent = currentInput;
+      } catch {
+        display.textContent = "エラー";
+        currentInput = "";
+      }
+    }
+
+    function register() {
+      const table = document.querySelector("#history tbody");
+      const row = table.insertRow();
+      const expression = currentInput;
+      let result;
+
+      try {
+        result = eval(currentInput);
+      } catch {
+        alert("計算式が無効です");
+        return;
+      }
+
+      const date = document.getElementById("date").value;
+      const memo = document.getElementById("memo").value;
+
+      row.innerHTML = `
+        <td>${expression}</td>
+        <td>${result}</td>
+        <td>${date}</td>
+        <td>${memo}</td>
+        <td><button onclick="deleteRow(this)">❌</button></td>
+      `;
+
+      // リセット
+      currentInput = "";
+      display.textContent = "0";
+      document.getElementById("memo").value = "";
+    }
+
+    function deleteRow(button) {
+      const row = button.closest("tr");
+      row.remove();
+    }
+
+    function downloadCSV() {
+      let csv = "計算式,結果,日付,メモ\n";
+      const rows = document.querySelectorAll("#history tbody tr");
+      rows.forEach(row => {
+        const cells = row.querySelectorAll("td");
+        csv += [
+          cells[0].textContent,
+          cells[1].textContent,
+          cells[2].textContent,
+          cells[3].textContent
+        ].join(",") + "\n";
+      });
+
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "電卓メモ帳.csv";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+</html>
