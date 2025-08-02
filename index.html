@@ -3,13 +3,37 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>電卓メモ帳</title>
+  <title>忍者計算帳</title>
+
+  <!-- ✅ いつものアナリティクス -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-2LM85GJN0L"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-2LM85GJN0L');
+  </script>
+
+  <!-- ✅ いつものOGP設定 -->
+  <meta name="description" content="計算式・日付・メモを記録してCSV出力できる実用電卓アプリ。忍者計算帳、参上！" />
+  <meta property="og:title" content="忍者計算帳" />
+  <meta property="og:description" content="計算＋メモ＋日付の記録ができる便利な電卓帳。" />
+  <meta property="og:image" content="https://ninja-calc.kkpwebninja.com/card.png" />
+  <meta property="og:url" content="https://ninja-calc.kkpwebninja.com" />
+  <meta property="og:type" content="website" />
+
   <style>
     body {
       font-family: sans-serif;
       padding: 1rem;
       max-width: 500px;
       margin: auto;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 1rem;
     }
 
     #display {
@@ -23,13 +47,16 @@
     .buttons {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 0.5rem;
+      gap: 0.7rem;
       margin-bottom: 1rem;
     }
 
     .buttons button {
       font-size: 1.5rem;
-      padding: 1rem;
+      padding: 1.2rem;
+      border-radius: 0.5rem;
+      background: #f0f0f0;
+      border: 1px solid #999;
     }
 
     #date, #memo {
@@ -72,7 +99,7 @@
   </style>
 </head>
 <body>
-  <h1>電卓メモ帳</h1>
+  <h1>忍者計算帳</h1>
 
   <div id="display">0</div>
   <div class="buttons">
@@ -163,7 +190,6 @@
         <td><button onclick="deleteRow(this)">❌</button></td>
       `;
 
-      // リセット
       currentInput = "";
       display.textContent = "0";
       document.getElementById("memo").value = "";
@@ -191,7 +217,7 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "電卓メモ帳.csv";
+      a.download = "忍者計算帳.csv";
       a.click();
       URL.revokeObjectURL(url);
     }
