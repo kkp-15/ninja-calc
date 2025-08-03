@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>忍者計算帳</title>
 
-  <!-- ✅ いつものアナリティクス -->
+  <!-- ✅ アナリティクス -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-2LM85GJN0L"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -14,7 +14,7 @@
     gtag('config', 'G-2LM85GJN0L');
   </script>
 
-  <!-- ✅ いつものOGP設定 -->
+  <!-- ✅ OGP設定 -->
   <meta name="description" content="計算式・日付・メモを記録してCSV出力できる実用電卓アプリ。忍者計算帳、参上！" />
   <meta property="og:title" content="忍者計算帳" />
   <meta property="og:description" content="計算＋メモ＋日付の記録ができる便利な電卓帳。" />
@@ -122,6 +122,8 @@
     <button onclick="press('.')">.</button>
     <button onclick="calculate()">=</button>
     <button onclick="press('+')">＋</button>
+
+    <button onclick="clearInput()" style="grid-column: span 4; background: #ffe0e0;">C（リセット）</button>
   </div>
 
   <input type="date" id="date" />
@@ -145,6 +147,18 @@
   <script>
     let display = document.getElementById("display");
     let currentInput = "";
+    let historyData = [];
+
+    // 初期読み込み
+    window.onload = () => {
+      const saved = localStorage.getItem("ninjaCalcHistory");
+      if (saved) {
+        historyData = JSON.parse(saved);
+        historyData.forEach(addRow);
+      }
+      // 日付初期値を今日に
+      document.getElementById("date").value = new Date().toISOString().split('T')[0];
+    };
 
     function press(value) {
       if (display.textContent === "0" && value !== ".") {
@@ -166,12 +180,14 @@
       }
     }
 
+    function clearInput() {
+      currentInput = "";
+      display.textContent = "0";
+    }
+
     function register() {
-      const table = document.querySelector("#history tbody");
-      const row = table.insertRow();
       const expression = currentInput;
       let result;
-
       try {
         result = eval(currentInput);
       } catch {
@@ -182,37 +198,45 @@
       const date = document.getElementById("date").value;
       const memo = document.getElementById("memo").value;
 
-      row.innerHTML = `
-        <td>${expression}</td>
-        <td>${result}</td>
-        <td>${date}</td>
-        <td>${memo}</td>
-        <td><button onclick="deleteRow(this)">❌</button></td>
-      `;
+      const newEntry = { expression, result, date, memo };
+      historyData.push(newEntry);
+      saveData();
+      addRow(newEntry);
 
       currentInput = "";
       display.textContent = "0";
       document.getElementById("memo").value = "";
     }
 
+    function addRow(entry) {
+      const table = document.querySelector("#history tbody");
+      const row = table.insertRow();
+      row.innerHTML = `
+        <td>${entry.expression}</td>
+        <td>${entry.result}</td>
+        <td>${entry.date}</td>
+        <td>${entry.memo}</td>
+        <td><button onclick="deleteRow(this)">❌</button></td>
+      `;
+    }
+
     function deleteRow(button) {
       const row = button.closest("tr");
+      const index = row.rowIndex - 1; // header行を除く
+      historyData.splice(index, 1);
+      saveData();
       row.remove();
+    }
+
+    function saveData() {
+      localStorage.setItem("ninjaCalcHistory", JSON.stringify(historyData));
     }
 
     function downloadCSV() {
       let csv = "計算式,結果,日付,メモ\n";
-      const rows = document.querySelectorAll("#history tbody tr");
-      rows.forEach(row => {
-        const cells = row.querySelectorAll("td");
-        csv += [
-          cells[0].textContent,
-          cells[1].textContent,
-          cells[2].textContent,
-          cells[3].textContent
-        ].join(",") + "\n";
+      historyData.forEach(entry => {
+        csv += `${entry.expression},${entry.result},${entry.date},${entry.memo}\n`;
       });
-
       const blob = new Blob([csv], { type: "text/csv" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
