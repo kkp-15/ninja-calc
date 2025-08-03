@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>忍者計算帳</title>
 
-  <!-- ✅ アナリティクス -->
+  <!-- ✅ Googleアナリティクス -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-2LM85GJN0L"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -157,7 +157,7 @@
     <button onclick="clearInput()" style="grid-column: span 4; background: var(--accent);">C（リセット）</button>
   </div>
 
-  <input type="date" id="date" placeholder="日付（任意）" />
+  <input type="date" id="date" placeholder="例：2025-08-02" />
   <input type="text" id="memo" placeholder="メモを入力" />
   <button id="register" onclick="register()">登録する</button>
 
@@ -214,19 +214,26 @@
     }
 
     function register() {
-      const expression = currentInput;
-      let result;
-      try {
-        result = eval(currentInput);
-      } catch {
-        alert("計算式が無効です");
+      const date = document.getElementById("date").value.trim();
+      const memo = document.getElementById("memo").value.trim();
+      const expression = currentInput.trim();
+
+      if (!expression && !date && !memo) {
+        alert("日付・計算式・メモのいずれかを入力してください。");
         return;
       }
 
-      const date = document.getElementById("date").value || "";
-      const memo = document.getElementById("memo").value;
+      let result = "";
+      if (expression) {
+        try {
+          result = eval(expression);
+        } catch {
+          alert("計算式が無効です");
+          return;
+        }
+      }
 
-      const newEntry = { date, expression, memo };
+      const newEntry = { date, expression: expression || "", memo };
       historyData.push(newEntry);
       saveData();
       addRow(newEntry);
