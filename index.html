@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>忍者計算帳</title>
 
-  <!-- ✅ アナリティクス -->
+  <!-- ✅ Googleアナリティクス -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-2LM85GJN0L"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -23,11 +23,30 @@
   <meta property="og:type" content="website" />
 
   <style>
+    :root {
+      --bg: #ffffff;
+      --text: #000000;
+      --btn: #f0f0f0;
+      --btn-border: #999999;
+      --accent: #ffe0e0;
+    }
+
+    body.dark {
+      --bg: #1e1e1e;
+      --text: #ffffff;
+      --btn: #333333;
+      --btn-border: #777777;
+      --accent: #5c2c2c;
+    }
+
     body {
+      background-color: var(--bg);
+      color: var(--text);
       font-family: sans-serif;
       padding: 1rem;
       max-width: 500px;
       margin: auto;
+      transition: background 0.3s, color 0.3s;
     }
 
     h1 {
@@ -36,12 +55,22 @@
       margin-bottom: 1rem;
     }
 
+    #themeToggle {
+      display: block;
+      margin: 0 auto 1rem auto;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
     #display {
       font-size: 2rem;
       text-align: right;
       padding: 0.5rem;
       border: 1px solid #ccc;
       margin-bottom: 1rem;
+      background: var(--btn);
+      color: var(--text);
     }
 
     .buttons {
@@ -55,8 +84,9 @@
       font-size: 1.5rem;
       padding: 1.2rem;
       border-radius: 0.5rem;
-      background: #f0f0f0;
-      border: 1px solid #999;
+      background: var(--btn);
+      border: 1px solid var(--btn-border);
+      color: var(--text);
     }
 
     #date, #memo {
@@ -64,6 +94,9 @@
       margin-bottom: 0.5rem;
       padding: 0.5rem;
       font-size: 1rem;
+      background: var(--btn);
+      color: var(--text);
+      border: 1px solid var(--btn-border);
     }
 
     #register, #download {
@@ -71,6 +104,9 @@
       padding: 0.75rem;
       font-size: 1rem;
       margin: 0.5rem 0;
+      background: var(--btn);
+      color: var(--text);
+      border: 1px solid var(--btn-border);
     }
 
     table {
@@ -93,13 +129,14 @@
     }
 
     #footer a {
-      color: #333;
+      color: var(--text);
       text-decoration: none;
     }
   </style>
 </head>
 <body>
   <h1>忍者計算帳</h1>
+  <button id="themeToggle">🌗 ダークモード切替</button>
 
   <div id="display">0</div>
   <div class="buttons">
@@ -123,7 +160,7 @@
     <button onclick="calculate()">=</button>
     <button onclick="press('+')">＋</button>
 
-    <button onclick="clearInput()" style="grid-column: span 4; background: #ffe0e0;">C（リセット）</button>
+    <button onclick="clearInput()" style="grid-column: span 4; background: var(--accent);">C（リセット）</button>
   </div>
 
   <input type="date" id="date" />
@@ -149,15 +186,23 @@
     let currentInput = "";
     let historyData = [];
 
-    // 初期読み込み
+    // 初期化
     window.onload = () => {
+      // データ読み込み
       const saved = localStorage.getItem("ninjaCalcHistory");
       if (saved) {
         historyData = JSON.parse(saved);
         historyData.forEach(addRow);
       }
+
       // 日付初期値を今日に
       document.getElementById("date").value = new Date().toISOString().split('T')[0];
+
+      // テーマ初期化
+      const savedTheme = localStorage.getItem("theme");
+      if (savedTheme === "dark") {
+        document.body.classList.add("dark");
+      }
     };
 
     function press(value) {
@@ -195,7 +240,7 @@
         return;
       }
 
-      const date = document.getElementById("date").value;
+      const date = document.getElementById("date").value || "";
       const memo = document.getElementById("memo").value;
 
       const newEntry = { expression, result, date, memo };
@@ -222,7 +267,7 @@
 
     function deleteRow(button) {
       const row = button.closest("tr");
-      const index = row.rowIndex - 1; // header行を除く
+      const index = row.rowIndex - 1;
       historyData.splice(index, 1);
       saveData();
       row.remove();
@@ -245,6 +290,12 @@
       a.click();
       URL.revokeObjectURL(url);
     }
+
+    document.getElementById("themeToggle").onclick = () => {
+      document.body.classList.toggle("dark");
+      const mode = document.body.classList.contains("dark") ? "dark" : "light";
+      localStorage.setItem("theme", mode);
+    };
   </script>
 </body>
 </html>
