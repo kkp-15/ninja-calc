@@ -15,9 +15,9 @@
   </script>
 
   <!-- ✅ OGP設定 -->
-  <meta name="description" content="計算式・日付・メモを記録してCSV出力できる実用電卓アプリ。忍者計算帳、参上！" />
+  <meta name="description" content="数値・日付・メモを記録してCSV出力できる実用電卓アプリ。忍者計算帳、参上！" />
   <meta property="og:title" content="忍者計算帳" />
-  <meta property="og:description" content="計算＋メモ＋日付の記録ができる便利な電卓帳。" />
+  <meta property="og:description" content="計算＋記録＋CSV出力ができる便利な数値メモ帳。" />
   <meta property="og:image" content="https://ninja-calc.kkpwebninja.com/card.png" />
   <meta property="og:url" content="https://ninja-calc.kkpwebninja.com" />
   <meta property="og:type" content="website" />
@@ -163,7 +163,7 @@
 
   <table id="history">
     <thead>
-      <tr><th>日付</th><th>計算式</th><th>メモ</th><th>削除</th></tr>
+      <tr><th>日付</th><th>数値</th><th>メモ</th><th>削除</th></tr>
     </thead>
     <tbody></tbody>
   </table>
@@ -216,24 +216,14 @@
     function register() {
       const date = document.getElementById("date").value.trim();
       const memo = document.getElementById("memo").value.trim();
-      const expression = currentInput.trim();
+      const value = display.textContent.trim();
 
-      if (!expression && !date && !memo) {
-        alert("日付・計算式・メモのいずれかを入力してください。");
+      if (!value || value === "0" && !date && !memo) {
+        alert("数値・日付・メモのいずれかを入力してください。");
         return;
       }
 
-      let result = "";
-      if (expression) {
-        try {
-          result = eval(expression);
-        } catch {
-          alert("計算式が無効です");
-          return;
-        }
-      }
-
-      const newEntry = { date, expression: expression || "", memo };
+      const newEntry = { date, value, memo };
       historyData.push(newEntry);
       saveData();
       addRow(newEntry);
@@ -248,7 +238,7 @@
       const row = table.insertRow();
       row.innerHTML = `
         <td>${entry.date}</td>
-        <td>${entry.expression}</td>
+        <td>${entry.value}</td>
         <td>${entry.memo}</td>
         <td><button onclick="deleteRow(this)">❌</button></td>
       `;
@@ -267,9 +257,9 @@
     }
 
     function downloadCSV() {
-      let csv = "日付,計算式,メモ\n";
+      let csv = "日付,数値,メモ\n";
       historyData.forEach(entry => {
-        csv += `${entry.date},${entry.expression},${entry.memo}\n`;
+        csv += `${entry.date},${entry.value},${entry.memo}\n`;
       });
       const blob = new Blob([csv], { type: "text/csv" });
       const url = URL.createObjectURL(blob);
